@@ -1,0 +1,21 @@
+server:
+  port: 7000
+  shutdown: graceful
+
+spring:
+  application:
+    name: openapi-codegen-example
+  web:
+    resources:
+      static-locations: classpath:/static/
+      add-mappings: true
+      cache:
+        period: 0
+
+springdoc:
+  api-doc:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /docs
+    url: /api-docs.yaml
