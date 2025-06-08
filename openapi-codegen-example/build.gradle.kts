@@ -43,7 +43,7 @@ kotlin {
 }
 
 openApiGenerate {
-	generatorName.set("spring")
+	generatorName.set("kotlin-spring")
 	inputSpec.set("$rootDir/src/main/resources/static/api-docs.yaml")
 	outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.absolutePath)
 	modelNameSuffix.set("ExternalModel")
@@ -56,16 +56,15 @@ openApiGenerate {
 			"interfaceOnly" to "true",
 			"openapiNullable" to "true",
 			"useTags" to "true",
-			"jakarta" to "true",
-			"useJakartaEe" to "true",
 			"useBeanValidation" to "true",
+			"useSpringBoot3" to "true"
 		)
 	)
 }
 sourceSets {
 	getByName("main") {
-		java {
-			srcDir(layout.buildDirectory.dir("generated/openapi/src/main/java").get().asFile.absolutePath)
+		kotlin {
+			srcDir(layout.buildDirectory.dir("generated/openapi/src/main/kotlin").get().asFile.absolutePath)
 		}
 	}
 }

@@ -22,7 +22,7 @@ ___
 ## Porque usar o Openapi generator.
 Se você é mais novo ou nunca mexeu em projetos legados, não sabe como era a dor de cabeça de criar ou manter uma documentação de API para um projeto novo ou ja existe.
 
-Em ambientes de fábricas de software onde a rotatividade é grande e por diversas vezes a qualidade dos profissionais pode ser... questionavel, por asim se dizer, nem todos se lembram de documentar os seus endpoints ou os seus objetos de requisição e resposta (as vezes nem ha tempo habil para isso).
+Em ambientes de fábricas de software onde a rotatividade é grande e por diversas vezes a qualidade dos profissionais pode ser... questionavel, por assim se dizer, nem todos se lembram de documentar os seus endpoints ou os seus objetos de requisição e resposta (as vezes nem ha tempo habil para isso).
 
 Por conta das bibliotecas de versões mais antigas (até mesmo na springfox, que hoje é considerada legado), criar uma documentação era sempre uma dor de cabeça, e manter ela era mais ainda. 
 
@@ -39,3 +39,65 @@ Isso porque ela é facilmente integravel e manutenível, já que tudo (a assinat
  * Centralização da documentação 
  * Facil Integração e Manutenção com código já existente
 
+___
+
+## Usando o openapi-generator
+
+Se você chegou até aqui, está na hora de pegar o seu codigo e vamos implementar passo a passo como fazer a integração desta lib no seu projeto.
+### 1) Inserido dependencias e plugins
+
+Ja que estamos aqui, vamos começar pelo começo. A pergunta é: qual lib do spring web você está usando? 
+
+`spring-boot-starter-web` ou `spring-boot-starter-webflux`? Saiba que o openapi-generator funciona em ambas, mas a lib do springdoc muda. 
+#### Instalando a versão correta para a sua aplicação você já garante a integração entre o projeto spring e o swagger (como diz a documentação [aqui](https://springdoc.org/#kotlin-support)). 
+
+ * Caso esteja usando `spring-boot-starter-web` inclua as seguintes dependencias: 
+```kotlin
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.8")
+```
+ * Caso esteja usando o `spring-boot-starter-webflux` inclua as seguintes dependencias: 
+```kotlin
+	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.8")
+	implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.8")
+```
+
+De qualquer forma, em ambos os casos adicione o seguinte plugin para seu arquivo de build : 
+```kotlin
+	id("org.openapi.generator") version "7.13.0"
+```
+ Depois que tudo estiver inserido, e seu projeto estiver buildado. Apartir deste ponto podemos confiugrar o springdoc do projeto (o que vamos fazer por último).
+ 
+### 2) Criando um arquivo da especificação openapi
+
+Essa é uma atividade bem simples pra ser sincero, mas de extrema importancia. Vamos criar o arquivo que vai ser responsavel por gerar e documentar as interfaces de API e as classes de request e response. Este arquivo também vai ser o que será mantido para expansao da documentação e das funcionalidades.
+
+É de suma importancia que todos os desenvolvedores envolvidos no projeto tenham em mente que fazer e manter este arquivo é muito mais rapido para eles até para construir novas funcionalidades. E mesmo que eles não entendam a importancia, bom, voce sempre pode usar o [ArchUnit](https://www.archunit.org/) para fazer dessa cultura uma norma de arquitetura.
+
+#### Dada as devidas observações, vamos para o passo a passo: 
+
+ * Na sua pasta resources crie uma pasta chamada `static`(se ela já não estiver criada). Dentro desta pasta ficam todos os arquivos estaticos que o serviço vai servir. .
+ * Crie um arquivo `yaml` ou `json` com o nome que quiser, aqui eu chamei de `api-docs.yaml`, mas voce pode chamar do que quiser desde que tenha uma das extensões. Aqui nós vamos abordar o arquivo `.yaml`.
+ * Dentro deste arquivo, coloque a especificação da documentação da sua api.  Para exemplificar temos o arquivo deste projeto com o seguinte conteudo:
+
+```yaml
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: OpenAPI Codegen Example
+  description: This is an example to other peoples
+servers:
+  - url: 'http://localhost:7000'
+paths:
+  /example:
+    get:
+      summary: Endpoint Example to generate code
+      operationId: exampleMethod
+      tags:
+        - ExampleEndpoint
+      responses:
+        '200':
+          description: Success
+```
+
+Vamos tratar sobre os detalhes do que pode ou não pode ser feito neste corpo em outro artigo, mas você pode conferir [aqui](https://swagger.io/specification/) a documentação de como criar um arquivo de especificação openapi para sua api apartir da sua necessidade.
