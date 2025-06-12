@@ -62,7 +62,7 @@ Ja que estamos aqui, vamos começar pelo começo. A pergunta é: qual lib do spr
 	implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.8")
 ```
 
-De qualquer forma, em ambos os casos adicione o seguinte plugin para seu arquivo de build : 
+De qualquer forma, em ambos os casos adicione o seguinte plugin para seu arquivo de build: 
 ```kotlin
 	id("org.openapi.generator") version "7.13.0"
 ```
@@ -101,3 +101,137 @@ paths:
 ```
 
 Vamos tratar sobre os detalhes do que pode ou não pode ser feito neste corpo em outro artigo, mas você pode conferir [aqui](https://swagger.io/specification/) a documentação de como criar um arquivo de especificação openapi para sua api apartir da sua necessidade.
+
+### 3) Configurando a geração de codigo na sua build
+
+Essa talvez seja a parte mais importante e parte que muitos erram. Configurar o `build.gradle.kts` não é um bixo de 7 cabeças, mas muitos desenvolvedores ignoram que podem mexer em seus arquivos de builds, personalizar pipelines ou criar novas rotinas para serem executadas durante a build. Muitos SEQUER SABEM que podem fazer isso, seja no maven ou no gradle. 
+
+Independente do que você esteja usando para fazer a build do seu projeto (Maven, Gradle ou SBT), é importante que você conheça as opções e as limitações que a sua ferramenta tem.
+
+Dito isso vamos aos passos: 
+ * No seu arquivo `build.gradle.kts` coloque a seguinte task em seu arquivo : 
+```kotlin
+openApiGenerate {
+	generatorName.set("kotlin-spring")
+	inputSpec.set("$rootDir/src/main/resources/static/api-docs.yaml")
+	outputDir.set(layout.buildDirectory.dir("generated/openapi").get().asFile.absolutePath)
+	modelNameSuffix.set("ExternalModel")
+	apiPackage.set("com.sindeaux.openapi_codegen_example.application.web.apis")
+	modelPackage.set("com.sindeaux.openapi_codegen_example.application.web.models")
+	configOptions.set(
+		mapOf(
+			"dateLibrary" to "java8",
+			"gradleBuildFile" to "false",
+			"interfaceOnly" to "true",
+			"openapiNullable" to "true",
+			"useTags" to "true",
+			"useBeanValidation" to "true",
+			"useSpringBoot3" to "true"
+		)
+	)
+}
+```
+
+ * Logo abaixo adicione no mesmo arquivo a task de sourceSets : 
+```kotlin
+sourceSets {
+	getByName("main") {
+		kotlin {
+			srcDir(layout.buildDirectory.dir("generated/openapi/src/main/kotlin").get().asFile.absolutePath)
+		}
+	}
+}
+```
+ * E por último verifique se existe uma task chamda `compileKotlin`. Caso ela não exista crie, caso ela exista apenas adicione o dependsOn:
+```kotlin
+tasks.compileKotlin {
+	dependsOn("openApiGenerate")
+}
+```
+
+### 4) Configurando a aplicação para exibir a documentação do springdoc
+
+Nesse ponto ja estamos praticamente nos finalments das configurações. Nesse ponto ja temos codigo gerado pelo arquivo da especificação, mas queremos que o swagger apareça certo ?
+
+Para isso acontecer é bem simples. Vá no seu application.yaml e configure o springdoc da seguinte maneira: 
+```yaml
+springdoc:
+  api-doc:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /docs
+    url: /api-docs.yaml
+```
+O Springdoc tem uma série de configurações que conseguem te dar uma extensa lista de libedades para as suas necessidades. Não vamos entrar a fundo neste topico ainda, com excessão de dois itens: 
+ * `springdoc.swagger-ui.path` :
+
+        Variavel resonsavel por indicar qual URL da sua api que vai redirecionar para o swagger. 
+        Cada caso é um caso , mas existem situações em que é necessário que se modifique o valor.
+        Por exemplp para que se adapte a alugum path que sua segurança permita ser acessado.
+ * `springdoc.swagger-ui.url`:
+
+        Variavel responsavel por dizer para o springdoc onde seu arquivo de especificação openapi está guardado no sistema.
+        Ele olha dentro da pasta src/main/resources/static, ja que essa é a pasta que a aplicação vai sempre servir arquivos estaticos.
+
+#### Observação Importante:
+
+Em alguns ambientes é preferivel que não se sirvam arquivos estaticos, mesmo que eles estejam protegidos. Neste caso voce pode configurar a aplicação para que escaneie os dados e anotações apartir do codigo gerado pelo OpenApiGenerator em um path especifico. Para casos assim seu `application.yaml` ficará assim :
+```yaml
+springdoc:
+  packages-to-scan:
+    - com.sindeaux.openapi_codegen_example.application.web
+  swagger-ui:
+    path: /docs
+```
+<b>Note que este pacote é o mesmo que compõe `apiPackage` e `modelPackage`. É importante que os pacotes de cada um dos dois esteja na lista em `packages-to-scan`</b>
+
+
+Dessa forma o springdoc vai escanear esse pacote atrás das annotations do openapi,e  gerar o swagger apartir do codigo gerado.
+
+### 5) Implementado nos seus controllers
+
+Essas é a parte simples. Se voce configurou certo tudo até aqui, basta rodar um `gradle clean build` no seu console e verificar que na pasta `build/generated/openapi/src/main/kotlin` tem diversas classes geradas a depender de como ficou o seu arquivo `api-docs.yaml`. Basta ir para a pasta que voce configurou o `apiPackage` e verificar que lá tem as interfaces dos seus controllers.
+
+No meu caso a classe `ExampleEndpointApi` foi gerada com o seguinte conteudo:
+
+```kotlin
+@RestController
+@Validated
+interface ExampleEndpointApi {
+
+    @Operation(
+        tags = ["ExampleEndpoint",],
+        summary = "Endpoint Example to generate code",
+        operationId = "exampleMethod",
+        description = """""",
+        responses = [
+            ApiResponse(responseCode = "200", description = "Success")
+        ]
+    )
+    @RequestMapping(
+            method = [RequestMethod.GET],
+            value = ["/example"]
+    )
+    fun exampleMethod(): ResponseEntity<Unit> {
+        return ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
+    }
+}
+```
+
+Veja que nela contem inclusive as annotations do Spring com `@RestController` e `@RequestMapping`.
+
+Crie uma classe Controller na sua aplicação. No meu caso eu criei o `ExampleEndpointController` e implemente essa interface gerada: 
+```kotlin
+class ExampleEndpointController() : ExampleEndpointApi {
+
+    override fun exampleMethod() : ResponseEntity<Unit> {
+        print("You have a request for your endpoint in method exampleMethod()")
+        return ResponseEntity.ok().build()
+    }
+}
+```
+
+Pronto, apartir daqui você agora tem uma forma eficiente não só de documentar a suas apis, mas também de otimizar o seu tempo, te poupando de escrever dezenas de anotações especificas para documentar um único Endpoint ou Controller.
+
+Espero que tenha gostado e até a próxima
