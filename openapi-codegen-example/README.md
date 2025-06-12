@@ -1,13 +1,13 @@
-# Os basicos do Springdoc Usando Openapi Generator
+# Os básicos do Springdoc Usando Openapi Generator
 
-O Projeto contido nesta pasta é um projeto simples. Ele visa mostrar como é montar um microsserviço com openapi-generator do zero. 
+O Projeto contido nesta pasta é um projeto simples. Ele visa mostrar como é montar um microsserviço com openapi-generator do zero.
 Ele foi gerado a partir do site do [Spring Initializer](https://start.spring.io/)
 ___
 ## Gerando o projeto: 
 
-Como já dito anteriormente, esse projeto foi gerado no spring initializer, e caso seja do seu interesse gerar um do zero, gere com as seguintes tecnologias: 
+Como já dito anteriormente, esse projeto foi gerado no spring initializer, e caso seja do seu interesse gerar um do zero, gere com as seguintes tecnologias:
  * `Kotlin`
- * `Gradle DSL (para kotin)` 
+ * `Gradle DSL (para Kotlin)`
  * `Spring Boot 3.5.0`
  * `Java 17`
  * `Spring Web (spring-boot-starter-web)`
@@ -19,17 +19,17 @@ Note que ao gerar o projeto seu arquivo de build deve ter `.kts` no final para q
 Aqui neste artigo não cobriremos Gradle para Groovy, mas com as ferramentas atuais de busca os arquivos podem ser facilmente convertidos e adaptados para sua necessidade, caso deseje isso.
 
 ___
-## Porque usar o Openapi generator.
-Se você é mais novo ou nunca mexeu em projetos legados, não sabe como era a dor de cabeça de criar ou manter uma documentação de API para um projeto novo ou ja existe.
+## Por que usar o Openapi generator.
+Se você é mais novo ou nunca mexeu em projetos legados, não sabe como era a dor de cabeça de criar ou manter uma documentação de API para um projeto novo ou já existente.
 
-Em ambientes de fábricas de software onde a rotatividade é grande e por diversas vezes a qualidade dos profissionais pode ser... questionavel, por assim se dizer, nem todos se lembram de documentar os seus endpoints ou os seus objetos de requisição e resposta (as vezes nem ha tempo habil para isso).
+Em ambientes de fábricas de software onde a rotatividade é grande e por diversas vezes a qualidade dos profissionais pode ser... questionável, por assim se dizer, nem todos se lembram de documentar os seus endpoints ou os seus objetos de requisição e resposta (às vezes nem há tempo hábil para isso).
 
-Por conta das bibliotecas de versões mais antigas (até mesmo na springfox, que hoje é considerada legado), criar uma documentação era sempre uma dor de cabeça, e manter ela era mais ainda. 
+Por conta das bibliotecas de versões mais antigas (até mesmo na springfox, que hoje é considerada legado), criar uma documentação era sempre uma dor de cabeça, e manter ela era mais ainda.
 
-Eram annotations e mais annotations para conseguir documentar um simples endpoint. Sem contar na quantidade infindada de erros que poderiam acontecer com a build do projeto por conta de versões diferentes de libs que conflitavam internamente.
+Eram annotations e mais annotations para conseguir documentar um simples endpoint. Sem contar na quantidade infindável de erros que poderiam acontecer com a build do projeto por conta de versões diferentes de libs que conflitavam internamente.
 
-Pensando nisso a biblioteca do openapi-generator foi criada. Unificando as libs para evitar conflitos e simplificando as coisas de forma que pudesse ser integrado a maioria dos ambientes em pouco tempo. 
-Isso porque ela é facilmente integravel e manutenível, já que tudo (a assinatura da sua api, os objetos de request e response, as documentações) vai ser gerado a partir de um arquivo yaml que também será usado para fornecer a documentação e o swagger da api.
+Pensando nisso a biblioteca do openapi-generator foi criada. Unificando as libs para evitar conflitos e simplificando as coisas de forma que pudesse ser integrado a maioria dos ambientes em pouco tempo.
+Isso Por que ela é facilmente integrável e manutenível, já que tudo (a assinatura da sua API, os objetos de request e response, as documentações) vai ser gerado a partir de um arquivo yaml que também será usado para fornecer a documentação e o swagger da api.
 
 ### Vantagens do uso do openapi-generator
  * Geração de swagger automatico sem configurações complexas
@@ -37,26 +37,26 @@ Isso porque ela é facilmente integravel e manutenível, já que tudo (a assinat
  * Annotations de documentações gerados automaticamente
  * Beans gerados para os seus Controllers com todas as documentações do openapi 
  * Centralização da documentação 
- * Facil Integração e Manutenção com código já existente
+ * fácil Integração e Manutenção com código já existente
 
 ___
 
 ## Usando o openapi-generator
 
 Se você chegou até aqui, está na hora de pegar o seu codigo e vamos implementar passo a passo como fazer a integração desta lib no seu projeto.
-### 1) Inserido dependencias e plugins
+### 1) Inserindo dependências e plugins
 
-Ja que estamos aqui, vamos começar pelo começo. A pergunta é: qual lib do spring web você está usando? 
+já que estamos aqui, vamos começar pelo começo. A pergunta é: qual lib do spring web você está usando?
 
-`spring-boot-starter-web` ou `spring-boot-starter-webflux`? Saiba que o openapi-generator funciona em ambas, mas a lib do springdoc muda. 
-#### Instalando a versão correta para a sua aplicação você já garante a integração entre o projeto spring e o swagger (como diz a documentação [aqui](https://springdoc.org/#kotlin-support)). 
+`spring-boot-starter-web` ou `spring-boot-starter-webflux`? Saiba que o openapi-generator funciona em ambas, mas a lib do springdoc muda.
+#### Instalando a versão correta para a sua aplicação você já garante a integração entre o projeto spring e o swagger (como diz a documentação [aqui](https://springdoc.org/#kotlin-support)).
 
- * Caso esteja usando `spring-boot-starter-web` inclua as seguintes dependencias: 
+ * Caso esteja usando `spring-boot-starter-web` inclua as seguintes dependências:
 ```kotlin
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.8")
 ```
- * Caso esteja usando o `spring-boot-starter-webflux` inclua as seguintes dependencias: 
+ * Caso esteja usando o `spring-boot-starter-webflux` inclua as seguintes dependências:
 ```kotlin
 	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.8")
 	implementation("org.springdoc:springdoc-openapi-starter-webflux-api:2.8.8")
@@ -66,19 +66,19 @@ De qualquer forma, em ambos os casos adicione o seguinte plugin para seu arquivo
 ```kotlin
 	id("org.openapi.generator") version "7.13.0"
 ```
- Depois que tudo estiver inserido, e seu projeto estiver buildado. Apartir deste ponto podemos confiugrar o springdoc do projeto (o que vamos fazer por último).
- 
+Depois que tudo estiver Inserindo, e seu projeto estiver buildado. a partir deste ponto podemos confiugrar o springdoc do projeto (o que vamos fazer por último).
+
 ### 2) Criando um arquivo da especificação openapi
 
-Essa é uma atividade bem simples pra ser sincero, mas de extrema importancia. Vamos criar o arquivo que vai ser responsavel por gerar e documentar as interfaces de API e as classes de request e response. Este arquivo também vai ser o que será mantido para expansao da documentação e das funcionalidades.
+Essa é uma atividade bem simples pra ser sincero, mas de extrema importância. Vamos criar o arquivo que vai ser responsavel por gerar e documentar as interfaces de API e as classes de request e response. Este arquivo também vai ser o que será mantido para expansão da documentação e das funcionalidades.
 
-É de suma importancia que todos os desenvolvedores envolvidos no projeto tenham em mente que fazer e manter este arquivo é muito mais rapido para eles até para construir novas funcionalidades. E mesmo que eles não entendam a importancia, bom, voce sempre pode usar o [ArchUnit](https://www.archunit.org/) para fazer dessa cultura uma norma de arquitetura.
+É de suma importância que todos os desenvolvedores envolvidos no projeto tenham em mente que fazer e manter este arquivo é muito mais rápido para eles até para construir novas funcionalidades. E mesmo que eles não entendam a importância, bom, você sempre pode usar o [ArchUnit](https://www.archunit.org/) para fazer dessa cultura uma norma de arquitetura.
 
 #### Dada as devidas observações, vamos para o passo a passo: 
 
  * Na sua pasta resources crie uma pasta chamada `static`(se ela já não estiver criada). Dentro desta pasta ficam todos os arquivos estaticos que o serviço vai servir. .
- * Crie um arquivo `yaml` ou `json` com o nome que quiser, aqui eu chamei de `api-docs.yaml`, mas voce pode chamar do que quiser desde que tenha uma das extensões. Aqui nós vamos abordar o arquivo `.yaml`.
- * Dentro deste arquivo, coloque a especificação da documentação da sua api.  Para exemplificar temos o arquivo deste projeto com o seguinte conteudo:
+ * Crie um arquivo `yaml` ou `json` com o nome que quiser, aqui eu chamei de `api-docs.yaml`, mas você pode chamar do que quiser desde que tenha uma das extensões. Aqui nós vamos abordar o arquivo `.yaml`.
+ * Dentro deste arquivo, coloque a especificação da documentação da sua API.  Para exemplificar temos o arquivo deste projeto com o seguinte conteudo:
 
 ```yaml
 openapi: 3.0.0
@@ -100,11 +100,11 @@ paths:
           description: Success
 ```
 
-Vamos tratar sobre os detalhes do que pode ou não pode ser feito neste corpo em outro artigo, mas você pode conferir [aqui](https://swagger.io/specification/) a documentação de como criar um arquivo de especificação openapi para sua api apartir da sua necessidade.
+Vamos tratar sobre os detalhes do que pode ou não pode ser feito neste corpo em outro artigo, mas você pode conferir [aqui](https://swagger.io/specification/) a documentação de como criar um arquivo de especificação openapi para sua API a partir da sua necessidade.
 
 ### 3) Configurando a geração de codigo na sua build
 
-Essa talvez seja a parte mais importante e parte que muitos erram. Configurar o `build.gradle.kts` não é um bixo de 7 cabeças, mas muitos desenvolvedores ignoram que podem mexer em seus arquivos de builds, personalizar pipelines ou criar novas rotinas para serem executadas durante a build. Muitos SEQUER SABEM que podem fazer isso, seja no maven ou no gradle. 
+Essa talvez seja a parte mais importante e parte que muitos erram. Configurar o `build.gradle.kts` não é um bixo de 7 cabeças, mas muitos desenvolvedores ignoram que podem mexer em seus arquivos de builds, personalizar pipelines ou criar novas rotinas para serem executadas durante a build. Muitos SEQUER SABEM que podem fazer isso, seja no maven ou no gradle.
 
 Independente do que você esteja usando para fazer a build do seu projeto (Maven, Gradle ou SBT), é importante que você conheça as opções e as limitações que a sua ferramenta tem.
 
@@ -142,7 +142,7 @@ sourceSets {
 	}
 }
 ```
- * E por último verifique se existe uma task chamda `compileKotlin`. Caso ela não exista crie, caso ela exista apenas adicione o dependsOn:
+ * E por último verifique se existente uma task chamda `compileKotlin`. Caso ela não exista crie, caso ela exista apenas adicione o dependsOn:
 ```kotlin
 tasks.compileKotlin {
 	dependsOn("openApiGenerate")
@@ -151,9 +151,9 @@ tasks.compileKotlin {
 
 ### 4) Configurando a aplicação para exibir a documentação do springdoc
 
-Nesse ponto ja estamos praticamente nos finalments das configurações. Nesse ponto ja temos codigo gerado pelo arquivo da especificação, mas queremos que o swagger apareça certo ?
+Nesse ponto já estamos praticamente nos finalmentes das configurações. Nesse ponto já temos codigo gerado pelo arquivo da especificação, mas queremos que o swagger apareça certo ?
 
-Para isso acontecer é bem simples. Vá no seu application.yaml e configure o springdoc da seguinte maneira: 
+Para isso acontecer é bem simples. Vá no seu application.yaml e configure o springdoc da seguinte maneira:
 ```yaml
 springdoc:
   api-doc:
@@ -163,20 +163,20 @@ springdoc:
     path: /docs
     url: /api-docs.yaml
 ```
-O Springdoc tem uma série de configurações que conseguem te dar uma extensa lista de libedades para as suas necessidades. Não vamos entrar a fundo neste topico ainda, com excessão de dois itens: 
+O Springdoc tem uma série de configurações que conseguem te dar uma extensa lista de liberdades para as suas necessidades. Não vamos entrar a fundo neste topico ainda, com exceção de dois itens:
  * `springdoc.swagger-ui.path` :
 
-        Variavel resonsavel por indicar qual URL da sua api que vai redirecionar para o swagger. 
-        Cada caso é um caso , mas existem situações em que é necessário que se modifique o valor.
-        Por exemplp para que se adapte a alugum path que sua segurança permita ser acessado.
+       Variável responsável por indicar qual URL da sua API que vai redirecionar para o swagger. 
+       Cada caso é um caso , mas existem situações em que é necessário que se modifique o valor.
+       Por exemplo para que se adapte a algum path que sua segurança permita ser acessado.
  * `springdoc.swagger-ui.url`:
 
-        Variavel responsavel por dizer para o springdoc onde seu arquivo de especificação openapi está guardado no sistema.
-        Ele olha dentro da pasta src/main/resources/static, ja que essa é a pasta que a aplicação vai sempre servir arquivos estaticos.
+       Variável responsavel por dizer para o springdoc onde seu arquivo de especificação openapi está guardado no sistema.
+       Ele olha dentro da pasta src/main/resources/static, já que essa é a pasta que a aplicação vai sempre servir arquivos estaticos.
 
 #### Observação Importante:
 
-Em alguns ambientes é preferivel que não se sirvam arquivos estaticos, mesmo que eles estejam protegidos. Neste caso voce pode configurar a aplicação para que escaneie os dados e anotações apartir do codigo gerado pelo OpenApiGenerator em um path especifico. Para casos assim seu `application.yaml` ficará assim :
+Em alguns ambientes é preferivel que não se sirvam arquivos estaticos, mesmo que eles estejam protegidos. Neste caso você pode configurar a aplicação para que escaneie os dados e anotações a partir do codigo gerado pelo OpenApiGenerator em um path especifico. Para casos assim seu `application.yaml` ficará assim :
 ```yaml
 springdoc:
   packages-to-scan:
@@ -187,11 +187,11 @@ springdoc:
 <b>Note que este pacote é o mesmo que compõe `apiPackage` e `modelPackage`. É importante que os pacotes de cada um dos dois esteja na lista em `packages-to-scan`</b>
 
 
-Dessa forma o springdoc vai escanear esse pacote atrás das annotations do openapi,e  gerar o swagger apartir do codigo gerado.
+Dessa forma o springdoc vai escanear esse pacote atrás das annotations do openapi,e  gerar o swagger a partir do codigo gerado.
 
-### 5) Implementado nos seus controllers
+### 5) Implementando nos seus controllers
 
-Essas é a parte simples. Se voce configurou certo tudo até aqui, basta rodar um `gradle clean build` no seu console e verificar que na pasta `build/generated/openapi/src/main/kotlin` tem diversas classes geradas a depender de como ficou o seu arquivo `api-docs.yaml`. Basta ir para a pasta que voce configurou o `apiPackage` e verificar que lá tem as interfaces dos seus controllers.
+Essas é a parte simples. Se você configurou certo tudo até aqui, basta rodar um `gradle clean build` no seu console e verificar que na pasta `build/generated/openapi/src/main/kotlin` tem diversas classes geradas a depender de como ficou o seu arquivo `api-docs.yaml`. Basta ir para a pasta que você configurou o `apiPackage` e verificar que lá tem as interfaces dos seus controllers.
 
 No meu caso a classe `ExampleEndpointApi` foi gerada com o seguinte conteudo:
 
@@ -232,6 +232,6 @@ class ExampleEndpointController() : ExampleEndpointApi {
 }
 ```
 
-Pronto, apartir daqui você agora tem uma forma eficiente não só de documentar a suas apis, mas também de otimizar o seu tempo, te poupando de escrever dezenas de anotações especificas para documentar um único Endpoint ou Controller.
+Pronto, a partir daqui você agora tem uma forma eficiente não só de documentar a suas APIs, mas também de otimizar o seu tempo, te poupando de escrever dezenas de anotações especificas para documentar um único Endpoint ou Controller.
 
 Espero que tenha gostado e até a próxima
