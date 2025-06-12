@@ -1,0 +1,17 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: OpenAPI Codegen Example
+  description: This is an example to other peoples
+servers:
+  - url: 'http://localhost:7000'
+paths:
+  /example:
+    get:
+      summary: Endpoint Example to generate code
+      operationId: exampleMethod
+      tags:
+        - ExampleEndpoint
+      responses:
+        '200':
+          description: Success
